@@ -12,6 +12,12 @@ jobs:
     permissions:
       contents: write
 
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64]
+        darwin_arch: [amd64, arm64]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -23,8 +29,12 @@ jobs:
 
       - name: Build binary
         run: |
-          chmod +x ./build.sh
-          ./build.sh
+          mkdir -p dist
+          if [ "${{ matrix.goos }}" == "darwin" ]; then
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.darwin_arch }} go build -o dist/network_test-${{ matrix.goos }}-${{ matrix.darwin_arch }} ./cmd/network_test
+          else
+            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/network_test-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/network_test
+          fi
 
       - name: Create Release
         id: create_release
@@ -48,4 +58,7 @@ jobs:
           asset_path: dist/network_test-${{ matrix.goos }}-${{ matrix.goarch }}
           asset_name: network_test-${{ matrix.goos }}-${{ matrix.goarch }}
           asset_content_type: application/octet-stream
+          if: matrix.goos == 'darwin' && matrix.darwin_arch == 'arm64'
+          asset_path: dist/network_test-darwin-arm64
+          asset_name: network_test-darwin-arm64
 
