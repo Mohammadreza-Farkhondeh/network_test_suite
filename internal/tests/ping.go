@@ -71,10 +71,17 @@ func RunPing(host string) (PingResult, error) {
 		}
 	}
 
+	var avgLatency time.Duration
+	if received == 0 {
+		return PingResult{}, fmt.Errorf("no packets received")
+	}
+	avgLatency = totalLatency / time.Duration(received)
+
 	packetLoss := float64(count-received) / float64(count) * 100
+
 	return PingResult{
 		Host:       host,
-		AvgLatency: totalLatency / time.Duration(received),
+		AvgLatency: avgLatency,
 		PacketLoss: packetLoss,
 		TestTime:   time.Now(),
 	}, nil
