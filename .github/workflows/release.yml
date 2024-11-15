@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     strategy:
       matrix:
         goos: [linux, windows, darwin]
         goarch: [amd64]
-        darwin_arch: [amd64, arm64]
 
     steps:
       - name: Checkout code
@@ -29,11 +29,7 @@ jobs:
       - name: Build binary
         run: |
           mkdir -p dist
-          if [ "${{ matrix.goos }}" == "darwin" ]; then
-            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.darwin_arch }} go build -o dist/network_test-${{ matrix.goos }}-${{ matrix.darwin_arch }} ./cmd/network_test
-          else
-            GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/network_test-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/network_test
-          fi
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/network_test-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/network_test
 
       - name: Create Release
         id: create_release
@@ -54,7 +50,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/network_test-${{ matrix.goos }}-${{ matrix.goarch }}
+          asset_name: network_test-${{ matrix.goos }}-${{ matrix.goarch }}
           asset_content_type: application/octet-stream
-          asset_path: dist/network_test-${{ matrix.goos }}-${{ matrix.darwin_arch || matrix.goarch }}
-          asset_name: network_test-${{ matrix.goos }}-${{ matrix.darwin_arch || matrix.goarch }}
-
