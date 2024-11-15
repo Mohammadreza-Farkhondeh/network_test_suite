@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     strategy:
       matrix:
         goos: [linux, windows, darwin]
@@ -56,9 +55,6 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_content_type: application/octet-stream
-          asset_path: dist/network_test-${{ matrix.goos }}-${{ matrix.goarch }}
-          asset_name: network_test-${{ matrix.goos }}-${{ matrix.goarch }}
-          ${{ if matrix.goos == 'darwin' && matrix.darwin_arch == 'arm64' }}:
-            asset_path: dist/network_test-darwin-arm64
-            asset_name: network_test-darwin-arm64
+          asset_path: dist/network_test-${{ matrix.goos }}-${{ matrix.darwin_arch || matrix.goarch }}
+          asset_name: network_test-${{ matrix.goos }}-${{ matrix.darwin_arch || matrix.goarch }}
 
