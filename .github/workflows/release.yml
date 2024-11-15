@@ -14,11 +14,6 @@ jobs:
     permissions:
       contents: write
 
-    strategy:
-      matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -30,8 +25,8 @@ jobs:
 
       - name: Build binary
         run: |
-          mkdir -p dist
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/network_test-${{ matrix.goos }}-${{ matrix.goarch }} ./cmd/network_test
+          chmod +x ./build.sh
+          ./build.sh
 
       - name: Create Release
         id: create_release
